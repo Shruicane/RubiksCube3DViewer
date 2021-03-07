@@ -41,7 +41,6 @@ public class Cube {
             this.isValid = true;
         }catch (Exception e){
             this.isValid = false;
-            e.printStackTrace();
         }
 
 
