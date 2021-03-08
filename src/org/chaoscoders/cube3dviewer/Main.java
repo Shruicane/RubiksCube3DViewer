@@ -88,7 +88,7 @@ public class Main extends Application {
 
     private static void initPrimaryStage(Stage primaryStage){
         primaryStage.setTitle("Cube Viewer");
-        primaryStage.getIcons().add(new Image(Main.class.getResource("/RubiksCubeIcon.png").getPath()));
+        primaryStage.getIcons().add(new Image(Main.class.getResourceAsStream("/RubiksCubeIcon.png")));
         primaryStage.setScene(mainScene);
         primaryStage.show();
     }
