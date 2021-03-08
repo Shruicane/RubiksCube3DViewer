@@ -1,7 +1,5 @@
 package org.chaoscoders.cube3dviewer;
 
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
@@ -9,11 +7,8 @@ import javafx.scene.shape.Box;
 
 public class Cube {
 
-
-    // C0,C1,C2,C3,C4,C5,C6,C7,C8; 6-mal
-
-    private Box[][] boxFaces;
-    private int[][] faces;
+    private final Box[][] boxFaces;
+    private final int[][] faces;
     private boolean isValid;
 
     public Cube(String cubeCode){
@@ -31,7 +26,7 @@ public class Cube {
         try{
             int index = 0;
             for (String s : cubeCode.split(";")){
-                for (int i = 0; i < 9; i++) {
+                for (int i = 0; i < 9 && index < 6; i++) {
                     faces[index][i] = Integer.parseInt(s.split(",")[i]);
                     Material mat = Main.mats[faces[index][i]];
                     boxFaces[index][i].setMaterial(mat);

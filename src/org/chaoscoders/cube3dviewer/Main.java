@@ -19,16 +19,11 @@ import java.io.IOException;
 
 public class Main extends Application {
 
-    private static double xRot = 0;
-    private static double yRot = 0;
-    private static double zRot = 0;
-
-    private static double mousePosX;
-    private static double mousePosY;
-    private static double mouseOldX;
-    private static double mouseOldY;
-
+    public static Box[][] faces;
+    public static int[][] intFaces;
     public static Material[] mats;
+    public static double sens;
+
     public static Group root;
     public static Group wFaces;
     public static Group rFaces;
@@ -38,9 +33,9 @@ public class Main extends Application {
     public static Group yFaces;
     public static Box baseCube;
 
-    private static double size = 100;
-    private static double offset = size/15;
-    private static double centerDistance = ( (size * 3) + (offset * 4) ) / 2;
+    private static double size;
+    private static double offset;
+    private static double centerDistance;
 
     private static BorderPane pane;
     private static Scene mainScene;
@@ -48,14 +43,56 @@ public class Main extends Application {
     private static Rotate rotateX;
     private static Rotate rotateY;
 
-    public static Box[][] faces;
-    public static int[][] intFaces;
+    private double mousePosX;
+    private double mousePosY;
+    private double mouseOldX;
+    private double mouseOldY;
 
-    public static double sens = 1;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
+        initMembers();
+        createBaseCube();
+        initRoot();
+        initBorderPane();
+        loadCube();
+        loadLeftPane();
+        mainScene = new Scene(pane, 1920, 1080, false);
+        loadCamera();
+        initPrimaryStage(primaryStage);
+    }
 
+    public static void loadCube(){
+
+        //create faces
+        //yellow & white
+        wFaces = generateFace(0,100, 100, 10);
+        yFaces = generateFace(5,100, 100, 10);
+        wFaces.setTranslateZ(-centerDistance);
+        yFaces.setTranslateZ(centerDistance);
+
+        //red & orange
+        rFaces = generateFace(1,10, 100, 100);
+        oFaces = generateFace(3,10, 100, 100);
+        rFaces.setTranslateX(-centerDistance);
+        oFaces.setTranslateX(centerDistance);
+
+
+        //blue & green
+        bFaces = generateFace(2, 100, 10, 100);
+        gFaces = generateFace(4, 100, 10, 100);
+        bFaces.setTranslateY(centerDistance);
+        gFaces.setTranslateY(-centerDistance);
+
+        fixFaceRotation();
+
+        //delete Nodes and them back to the scene. Magic!
+        root.getChildren().clear();
+        root.getChildren().addAll(wFaces, rFaces, bFaces, oFaces, gFaces, yFaces, baseCube, new AmbientLight());
+    }
+
+    private void initMembers(){
+        sens = 1;
         faces = new Box[6][9];
         mats = new Material[6];
         mats[0] = new PhongMaterial(Color.WHITE);
@@ -71,29 +108,16 @@ public class Main extends Application {
         size = 100;
         offset = size/15;
         centerDistance = ( (size * 3) + (offset * 4) ) / 2;
-
-        createBaseCube();
-        initRoot();
-
-        initBorderPane();
-        loadCube();
-        loadLeftPane();
-
-        //Creating a scene object
-        mainScene = new Scene(pane, 1920, 1080, false);
-        loadCamera();
-        initPrimaryStage(primaryStage);
-
     }
 
-    private static void initPrimaryStage(Stage primaryStage){
+    private void initPrimaryStage(Stage primaryStage){
         primaryStage.setTitle("Cube Viewer");
         primaryStage.getIcons().add(new Image(Main.class.getResourceAsStream("/RubiksCubeIcon.png")));
         primaryStage.setScene(mainScene);
         primaryStage.show();
     }
 
-    private static void loadCamera(){
+    private void loadCamera(){
         PerspectiveCamera camera = new PerspectiveCamera();
         camera.setTranslateX(0);
         camera.setTranslateY(0);
@@ -101,20 +125,20 @@ public class Main extends Application {
         mainScene.setCamera(camera);
     }
 
-    private static void createBaseCube(){
+    private void createBaseCube(){
         baseCube = new Box((size + offset) * 3 + offset, (size + offset) * 3 + offset, (size + offset) * 3 + offset);
         baseCube.setMaterial(new PhongMaterial(Color.BLACK));
         baseCube.setDrawMode(DrawMode.FILL);
     }
 
-    private static void loadLeftPane() throws IOException {
+    private void loadLeftPane() throws IOException {
         VBox left = FXMLLoader.load(Main.class.getResource("/SidePanel.fxml"));
         left.prefHeightProperty().bind(pane.heightProperty());
         left.setBackground(new Background(new BackgroundFill(Color.GRAY, CornerRadii.EMPTY, new Insets(0))));
         pane.setLeft(left);
     }
 
-    private static void initRoot(){
+    private void initRoot(){
         root = new Group();
         root.setTranslateX(500);
         root.setTranslateY(500);
@@ -124,107 +148,15 @@ public class Main extends Application {
         root.getTransforms().addAll(rotateX, rotateY);
     }
 
-    private static void initBorderPane(){
+    private void initBorderPane(){
         pane = new BorderPane();
         pane.setBackground(new Background(new BackgroundFill(Color.DARKGRAY, CornerRadii.EMPTY, new Insets(0))));
         subScene = new SubScene(root, 1100, 1080, true, SceneAntialiasing.BALANCED);
+        initRotator();
         Main.pane.setCenter(subScene);
     }
 
-    public static void loadCube(){
-        //create faces
-
-        //yellow & white
-        wFaces = new Group();
-        yFaces = new Group();
-
-        int i = 0;
-        for (int j = 0; j < 9; j++) {
-            faces[i][j] = new Box(100, 100, 10);
-            faces[i][j].setMaterial(mats[intFaces[i][j]]);
-            int indexX = j%3;
-            int indexY = j/3;
-            faces[i][j].setTranslateX((-1 + indexX) * ((offset + size)));
-            faces[i][j].setTranslateY((-1 + indexY) * ((offset + size)));
-            wFaces.getChildren().add(faces[i][j]);
-        }
-
-        wFaces.setTranslateZ(-centerDistance);
-
-        i = 5;
-        for (int j = 0; j < 9; j++) {
-            faces[i][j] = new Box(100, 100, 10);
-            faces[i][j].setMaterial(mats[intFaces[i][j]]);
-            int indexX = j%3;
-            int indexY = j/3;
-            faces[i][j].setTranslateX((-1 + indexX) * ((offset + size)));
-            faces[i][j].setTranslateY((-1 + indexY) * ((offset + size)));
-            yFaces.getChildren().add(faces[i][j]);
-        }
-
-        yFaces.setTranslateZ(centerDistance);
-
-        //red & orange
-        rFaces = new Group();
-        oFaces = new Group();
-
-        i = 1;
-        for (int j = 0; j < 9; j++) {
-            faces[i][j] = new Box(10, 100, 100);
-            faces[i][j].setMaterial(mats[intFaces[i][j]]);
-            int indexX = j%3;
-            int indexY = j/3;
-            faces[i][j].setTranslateY((-1 + indexX) * ((offset + size)));
-            faces[i][j].setTranslateZ((-1 + indexY) * ((offset + size)));
-            rFaces.getChildren().add(faces[i][j]);
-        }
-
-        rFaces.setTranslateX(-centerDistance);
-
-        i = 3;
-        for (int j = 0; j < 9; j++) {
-            faces[i][j] = new Box(10, 100, 100);
-            faces[i][j].setMaterial(mats[intFaces[i][j]]);
-            int indexX = j%3;
-            int indexY = j/3;
-            faces[i][j].setTranslateY((-1 + indexX) * ((offset + size)));
-            faces[i][j].setTranslateZ((-1 + indexY) * ((offset + size)));
-            oFaces.getChildren().add(faces[i][j]);
-        }
-
-        oFaces.setTranslateX(centerDistance);
-
-
-        //blue & green
-        bFaces = new Group();
-        gFaces = new Group();
-
-        i = 2;
-        for (int j = 0; j < 9; j++) {
-            faces[i][j] = new Box(100, 10, 100);
-            faces[i][j].setMaterial(mats[intFaces[i][j]]);
-            int indexX = j%3;
-            int indexY = j/3;
-            faces[i][j].setTranslateX((-1 + indexX) * ((offset + size)));
-            faces[i][j].setTranslateZ((-1 + indexY) * ((offset + size)));
-            bFaces.getChildren().add(faces[i][j]);
-        }
-
-        bFaces.setTranslateY(centerDistance);
-
-        i = 4;
-        for (int j = 0; j < 9; j++) {
-            faces[i][j] = new Box(100, 10, 100);
-            faces[i][j].setMaterial(mats[intFaces[i][j]]);
-            int indexX = j%3;
-            int indexY = j/3;
-            faces[i][j].setTranslateX((-1 + indexX) * ((offset + size)));
-            faces[i][j].setTranslateZ((-1 + indexY) * ((offset + size)));
-            gFaces.getChildren().add(faces[i][j]);
-        }
-
-        gFaces.setTranslateY(-centerDistance);
-
+    private void initRotator(){
         subScene.setOnMousePressed(me -> {
             mouseOldX = me.getSceneX();
             mouseOldY = me.getSceneY();
@@ -237,20 +169,42 @@ public class Main extends Application {
             mouseOldX = mousePosX;
             mouseOldY = mousePosY;
         });
+    }
 
-        fixFaceRotation();
+    private static Group generateFace(int i, int width, int height, int depth) {
+        Group face = new Group();
+        for (int j = 0; j < 9; j++) {
+            faces[i][j] = new Box(width, height, depth);
+            faces[i][j].setMaterial(mats[intFaces[i][j]]);
+            int indexX = j%3;
+            int indexY = j/3;
 
-        //Nodes löschen und dann neu hinzufügen. Magic!
-        root.getChildren().clear();
-        root.getChildren().addAll(wFaces, rFaces, bFaces, oFaces, gFaces, yFaces, baseCube, new AmbientLight());
-
+            switch (i){
+                case 0:
+                case 5:
+                    faces[i][j].setTranslateX((-1 + indexX) * ((offset + size)));
+                    faces[i][j].setTranslateY((-1 + indexY) * ((offset + size)));
+                    break;
+                case 1:
+                case 3:
+                    faces[i][j].setTranslateY((-1 + indexX) * ((offset + size)));
+                    faces[i][j].setTranslateZ((-1 + indexY) * ((offset + size)));
+                    break;
+                case 2:
+                case 4:
+                    faces[i][j].setTranslateX((-1 + indexX) * ((offset + size)));
+                    faces[i][j].setTranslateZ((-1 + indexY) * ((offset + size)));
+                    break;
+            }
+            face.getChildren().add(faces[i][j]);
+        }
+        return face;
     }
 
     private static void fixFaceRotation(){
         //Rotations der einzelnen Seiten anpassen um mit den Indexen aus dem Schema übereinzustimmen
         yFaces.setRotationAxis(Rotate.Y_AXIS);
         yFaces.setRotate(180);
-
         gFaces.setRotationAxis(Rotate.Z_AXIS);
         gFaces.setRotate(180);
 
@@ -262,15 +216,10 @@ public class Main extends Application {
         rzBox.setAngle(180);
         oFaces.getTransforms().addAll(rxBox, ryBox, rzBox);
 
-        //180 y
         bFaces.setRotationAxis(Rotate.Y_AXIS);
         bFaces.setRotate(180);
-
-        //180 x
         rFaces.setRotationAxis(Rotate.X_AXIS);
         rFaces.setRotate(180);
-
-        //180 z
         wFaces.setRotationAxis(Rotate.Z_AXIS);
         wFaces.setRotate(180);
     }
@@ -279,4 +228,3 @@ public class Main extends Application {
         launch(args);
     }
 }
-
