@@ -148,16 +148,12 @@ public class Controller {
 
         cubeListView.setCellFactory(lv -> {
 
-            ListCell<String> cell = new ListCell<String>() {
+            ListCell<String> cell = new ListCell<>();
 
-                @Override
-                protected void updateItem(String t, boolean bln) {
-                    super.updateItem(t, bln);
-                    if (t != null) {
-                        setText(t);
-                    }
-                }
-            };
+            cell.textProperty().bind(Bindings
+                    .when(cell.emptyProperty())
+                    .then("")
+                    .otherwise(cell.itemProperty().asString()));
 
             ContextMenu contextMenu = new ContextMenu();
             MenuItem editItem = new MenuItem();
