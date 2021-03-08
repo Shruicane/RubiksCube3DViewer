@@ -3,19 +3,19 @@ package org.chaoscoders.cube3dviewer;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
-import javafx.geometry.Point3D;
 import javafx.scene.*;
-import javafx.scene.control.Button;
+import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.*;
 import javafx.scene.transform.Rotate;
-import javafx.scene.transform.Transform;
 import javafx.stage.Stage;
 
 import javafx.scene.Scene;
+
+import java.io.IOException;
 
 public class Main extends Application {
 
@@ -43,6 +43,7 @@ public class Main extends Application {
     private static double centerDistance = ( (size * 3) + (offset * 4) ) / 2;
 
     private static BorderPane pane;
+    private static Scene mainScene;
     private static SubScene subScene;
     private static Rotate rotateX;
     private static Rotate rotateY;
@@ -55,8 +56,6 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
 
-
-
         faces = new Box[6][9];
         mats = new Material[6];
         mats[0] = new PhongMaterial(Color.WHITE);
@@ -65,7 +64,6 @@ public class Main extends Application {
         mats[3] = new PhongMaterial(Color.ORANGE);
         mats[4] = new PhongMaterial(Color.GREEN);
         mats[5] = new PhongMaterial(Color.YELLOW);
-        Material mat_black = new PhongMaterial(Color.BLACK);
 
         Cube standardCube = new Cube("0,0,0,0,0,0,0,0,0;1,1,1,1,1,1,1,1,1;2,2,2,2,2,2,2,2,2;3,3,3,3,3,3,3,3,3;4,4,4,4,4,4,4,4,4;5,5,5,5,5,5,5,5,5");
         intFaces = standardCube.getFaces();
@@ -74,68 +72,63 @@ public class Main extends Application {
         offset = size/15;
         centerDistance = ( (size * 3) + (offset * 4) ) / 2;
 
-        //Drawing a Box
+        createBaseCube();
+        initRoot();
 
-
-        baseCube = new Box((size + offset) * 3 + offset, (size + offset) * 3 + offset, (size + offset) * 3 + offset);
-        baseCube.setMaterial(mat_black);
-        baseCube.setDrawMode(DrawMode.FILL);
-        root = new Group();
-        pane = new BorderPane();
-        subScene = new SubScene(root, 1100, 1080, true, SceneAntialiasing.BALANCED);
-        Main.pane.setCenter(subScene);
+        initBorderPane();
         loadCube();
-
-
-        //Creating a Group object
-
-
-        root.setTranslateX(500);
-        root.setTranslateY(500);
-        root.setTranslateZ(0);
-
-        //matrixRotateNode(root, 0, 0, 0);
-
-        //Setting the position of the group
-
-        VBox left = FXMLLoader.load(getClass().getResource("/SidePanel.fxml"));
-        left.prefHeightProperty().bind(pane.heightProperty());
-
-
-
-
-
-        rotateX = new Rotate(30, 0, 0, 0, Rotate.X_AXIS);
-        rotateY = new Rotate(20, 0, 0, 0, Rotate.Y_AXIS);
-        root.getTransforms().addAll(rotateX, rotateY);
-
-        pane.setLeft(left);
-
-        pane.setBackground(new Background(new BackgroundFill(Color.DARKGRAY, CornerRadii.EMPTY, new Insets(0))));
-        left.setBackground(new Background(new BackgroundFill(Color.GRAY, CornerRadii.EMPTY, new Insets(0))));
-        left.setBackground(new Background(new BackgroundFill(Color.GRAY, CornerRadii.EMPTY, new Insets(0))));
-
+        loadLeftPane();
 
         //Creating a scene object
-        Scene scene = new Scene(pane, 1920, 1080, false);
+        mainScene = new Scene(pane, 1920, 1080, false);
+        loadCamera();
+        initPrimaryStage(primaryStage);
 
-        //Setting camera
+    }
+
+    private static void initPrimaryStage(Stage primaryStage){
+        primaryStage.setTitle("Cube Viewer");
+        primaryStage.getIcons().add(new Image(Main.class.getResource("/RubiksCubeIcon.png").getPath()));
+        primaryStage.setScene(mainScene);
+        primaryStage.show();
+    }
+
+    private static void loadCamera(){
         PerspectiveCamera camera = new PerspectiveCamera();
         camera.setTranslateX(0);
         camera.setTranslateY(0);
         camera.setTranslateZ(0);
+        mainScene.setCamera(camera);
+    }
 
+    private static void createBaseCube(){
+        baseCube = new Box((size + offset) * 3 + offset, (size + offset) * 3 + offset, (size + offset) * 3 + offset);
+        baseCube.setMaterial(new PhongMaterial(Color.BLACK));
+        baseCube.setDrawMode(DrawMode.FILL);
+    }
 
-        scene.setCamera(camera);
+    private static void loadLeftPane() throws IOException {
+        VBox left = FXMLLoader.load(Main.class.getResource("/SidePanel.fxml"));
+        left.prefHeightProperty().bind(pane.heightProperty());
+        left.setBackground(new Background(new BackgroundFill(Color.GRAY, CornerRadii.EMPTY, new Insets(0))));
+        pane.setLeft(left);
+    }
 
-        //Setting title to the Stage
-        primaryStage.setTitle("Cube Viewer");
+    private static void initRoot(){
+        root = new Group();
+        root.setTranslateX(500);
+        root.setTranslateY(500);
+        root.setTranslateZ(0);
+        rotateX = new Rotate(30, 0, 0, 0, Rotate.X_AXIS);
+        rotateY = new Rotate(20, 0, 0, 0, Rotate.Y_AXIS);
+        root.getTransforms().addAll(rotateX, rotateY);
+    }
 
-        //Adding scene to the stage
-        primaryStage.setScene(scene);
-
-        //Displaying the contents of the stage
-        primaryStage.show();
+    private static void initBorderPane(){
+        pane = new BorderPane();
+        pane.setBackground(new Background(new BackgroundFill(Color.DARKGRAY, CornerRadii.EMPTY, new Insets(0))));
+        subScene = new SubScene(root, 1100, 1080, true, SceneAntialiasing.BALANCED);
+        Main.pane.setCenter(subScene);
     }
 
     public static void loadCube(){
@@ -245,7 +238,15 @@ public class Main extends Application {
             mouseOldY = mousePosY;
         });
 
+        fixFaceRotation();
 
+        //Nodes löschen und dann neu hinzufügen. Magic!
+        root.getChildren().clear();
+        root.getChildren().addAll(wFaces, rFaces, bFaces, oFaces, gFaces, yFaces, baseCube, new AmbientLight());
+
+    }
+
+    private static void fixFaceRotation(){
         //Rotations der einzelnen Seiten anpassen um mit den Indexen aus dem Schema übereinzustimmen
         yFaces.setRotationAxis(Rotate.Y_AXIS);
         yFaces.setRotate(180);
@@ -272,11 +273,6 @@ public class Main extends Application {
         //180 z
         wFaces.setRotationAxis(Rotate.Z_AXIS);
         wFaces.setRotate(180);
-
-        //Nodes löschen und dann neu hinzufügen. Magic!
-        root.getChildren().clear();
-        root.getChildren().addAll(wFaces, rFaces, bFaces, oFaces, gFaces, yFaces, baseCube, new AmbientLight());
-
     }
 
     public static void main(String[] args) {
