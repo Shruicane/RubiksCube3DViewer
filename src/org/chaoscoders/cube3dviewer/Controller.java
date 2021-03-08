@@ -100,6 +100,7 @@ public class Controller {
     @FXML
     public void onClickRemove(){
         if(cubeListView.getSelectionModel().getSelectedItem() != null){
+            int index = cubeListView.getSelectionModel().getSelectedIndex();
             String selection = cubeListView.getSelectionModel().getSelectedItem();
             Alert confirm = new Alert(AlertType.CONFIRMATION,
                     "Are you sure you want to remove \"" + selection + "\" from the list?");
@@ -107,6 +108,9 @@ public class Controller {
             if(result.get() == ButtonType.OK){
                 cubeListView.getItems().remove(selection);
                 cubeMap.remove(selection);
+                if(index - 1 >= 0){
+                    cubeListView.getSelectionModel().select(index - 1);
+                }
             }
         }
     }
