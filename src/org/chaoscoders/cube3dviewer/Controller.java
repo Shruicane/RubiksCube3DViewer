@@ -1,13 +1,22 @@
 package org.chaoscoders.cube3dviewer;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DataFormat;
 import javafx.scene.layout.GridPane;
+import javafx.util.Callback;
 import javafx.util.Pair;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Optional;
 
@@ -23,34 +32,29 @@ public class Controller {
     private ListView<String> cubeListView;
 
     private HashMap<String, Cube> cubeMap;
+    private ArrayList<String> cubeNameList;
 
     @FXML
     public void onClickAdd(){
         //Namen müssen eindeutig sein
-
-        String cubeName;
-        String cubeCode;
-
-
-
         Optional<Pair<String, String>> result = this.getDialogResult();
         if (result.isPresent()){
-            cubeName = result.get().getKey();
-            cubeCode = result.get().getValue();
+            String cubeName = result.get().getKey();
+            String cubeCode = result.get().getValue();
             Cube cube = new Cube(cubeCode);
             if(!cubeMap.containsKey(cubeName)){
 
                 if(cube.isValid()){
                     this.cubeMap.put(cubeName, cube);
+                    this.cubeNameList.add(cubeName);
                     this.cubeListView.getItems().add(cubeName);
                     this.loadCube(cube);
 
                     this.cubeListView.getSelectionModel().select(this.cubeMap.size() - 1);
                 }else{
-                    Alert alert = new Alert(AlertType.ERROR, "Wrong Cube Code!");
+                    Alert alert = new Alert(AlertType.ERROR, "Invalid Cube Code!");
                     alert.show();
                 }
-
             }else{
                 Alert alert = new Alert(AlertType.ERROR, "Cube Name already in use!");
                 alert.show();
@@ -128,19 +132,62 @@ public class Controller {
         }
     }
 
+    int index = 0;
+
+
     @FXML
     private void initialize(){
         this.cubeMap = new HashMap<>();
+        this.cubeNameList = new ArrayList<>();
         sensSlider.valueProperty().addListener((observableValue, oldValue, newValue) -> {
             Main.sens = newValue.doubleValue();
             sensLabel.textProperty().setValue("Rotate Sensitivity: " + newValue.doubleValue());
         });
+        applyCellFactory();
     }
 
     private void loadCube(Cube cube){
         Main.faces = cube.getBoxFaces().clone();
         Main.intFaces = cube.getFaces().clone();
         Main.loadCube();
+    }
+
+    private void applyCellFactory(){
+        index = 0;
+
+        cubeListView.setCellFactory(lv -> {
+
+            ListCell<String> cell = new ListCell<String>() {
+
+                @Override
+                protected void updateItem(String t, boolean bln) {
+                    super.updateItem(t, bln);
+                    if (t != null) {
+                        setText(t);
+                    }
+                }
+            };
+
+            ContextMenu contextMenu = new ContextMenu();
+            MenuItem editItem = new MenuItem();
+            editItem.textProperty().bind(Bindings.format("Copy Cube Code"));
+            editItem.setOnAction(event -> {
+                final ClipboardContent content = new ClipboardContent();
+                content.putString(this.cubeMap.get(this.cubeListView.getSelectionModel().getSelectedItem()).getCubeCode());
+                Clipboard.getSystemClipboard().setContent(content);
+            });
+            contextMenu.getItems().addAll(editItem);
+
+            cell.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
+                if (isNowEmpty) {
+                    cell.setContextMenu(null);
+                } else {
+                    cell.setContextMenu(contextMenu);
+                }
+            });
+
+            return cell;
+        });
     }
 
 }

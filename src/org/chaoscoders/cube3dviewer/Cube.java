@@ -10,9 +10,11 @@ public class Cube {
     private final Box[][] boxFaces;
     private final int[][] faces;
     private boolean isValid;
+    private String cubeCode;
 
     public Cube(String cubeCode){
 
+        this.cubeCode = cubeCode;
         faces = new int[6][9];
         boxFaces = new Box[6][9];
 
@@ -37,8 +39,10 @@ public class Cube {
         }catch (Exception e){
             this.isValid = false;
         }
+    }
 
-
+    public String getCubeCode(){
+        return this.cubeCode;
     }
 
     public Box[][] getBoxFaces() {
