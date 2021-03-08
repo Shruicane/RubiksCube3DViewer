@@ -10,7 +10,7 @@ public class Cube {
     private final Box[][] boxFaces;
     private final int[][] faces;
     private boolean isValid;
-    private String cubeCode;
+    private final String cubeCode;
 
     public Cube(String cubeCode){
 

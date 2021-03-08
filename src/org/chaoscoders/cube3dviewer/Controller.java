@@ -1,7 +1,5 @@
 package org.chaoscoders.cube3dviewer;
 
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -10,13 +8,9 @@ import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.DataFormat;
 import javafx.scene.layout.GridPane;
-import javafx.util.Callback;
 import javafx.util.Pair;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Optional;
 
@@ -32,7 +26,6 @@ public class Controller {
     private ListView<String> cubeListView;
 
     private HashMap<String, Cube> cubeMap;
-    private ArrayList<String> cubeNameList;
 
     @FXML
     public void onClickAdd(){
@@ -46,7 +39,6 @@ public class Controller {
 
                 if(cube.isValid()){
                     this.cubeMap.put(cubeName, cube);
-                    this.cubeNameList.add(cubeName);
                     this.cubeListView.getItems().add(cubeName);
                     this.loadCube(cube);
 
@@ -138,7 +130,6 @@ public class Controller {
     @FXML
     private void initialize(){
         this.cubeMap = new HashMap<>();
-        this.cubeNameList = new ArrayList<>();
         sensSlider.valueProperty().addListener((observableValue, oldValue, newValue) -> {
             Main.sens = newValue.doubleValue();
             sensLabel.textProperty().setValue("Rotate Sensitivity: " + newValue.doubleValue());
