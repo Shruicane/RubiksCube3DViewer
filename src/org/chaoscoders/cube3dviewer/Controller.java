@@ -8,8 +8,6 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.GridPane;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.PhongMaterial;
 import javafx.util.Pair;
 
 import java.util.HashMap;
@@ -85,11 +83,12 @@ public class Controller {
                     this.cubeMap.put(cubeName, cube);
                     this.cubeListView.getItems().add(cubeName);
                     this.loadCube(cube);
+
+                    this.cubeListView.getSelectionModel().select(this.cubeMap.size() - 1);
                 }else{
                     Alert alert = new Alert(AlertType.ERROR, "Wrong Cube Code!");
                     alert.show();
                 }
-
 
             }else{
                 Alert alert = new Alert(AlertType.ERROR, "Cube Name already in use!");
