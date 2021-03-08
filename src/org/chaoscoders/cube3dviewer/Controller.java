@@ -17,10 +17,10 @@ import java.util.Optional;
 public class Controller {
 
     @FXML
-    private Label sensLabel;
+    private Label sensitivityLabel;
 
     @FXML
-    private Slider sensSlider;
+    private Slider sensitivitySlider;
 
     @FXML
     private ListView<String> cubeListView;
@@ -130,16 +130,16 @@ public class Controller {
     @FXML
     private void initialize(){
         this.cubeMap = new HashMap<>();
-        sensSlider.valueProperty().addListener((observableValue, oldValue, newValue) -> {
-            Main.sens = newValue.doubleValue();
-            sensLabel.textProperty().setValue("Rotate Sensitivity: " + newValue.doubleValue());
+        sensitivitySlider.valueProperty().addListener((observableValue, oldValue, newValue) -> {
+            Main.sensitivity = newValue.doubleValue();
+            sensitivityLabel.textProperty().setValue("Rotate Sensitivity: " + newValue.doubleValue());
         });
         applyCellFactory();
     }
 
     private void loadCube(Cube cube){
-        Main.faces = cube.getBoxFaces().clone();
-        Main.intFaces = cube.getFaces().clone();
+        Main.boxFaces = cube.getBoxFaces().clone();
+        Main.integerFaces = cube.getFaces().clone();
         Main.loadCube();
     }
 

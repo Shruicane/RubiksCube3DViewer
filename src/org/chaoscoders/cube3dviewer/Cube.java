@@ -30,7 +30,7 @@ public class Cube {
             for (String s : cubeCode.split(";")){
                 for (int i = 0; i < 9 && index < 6; i++) {
                     faces[index][i] = Integer.parseInt(s.split(",")[i]);
-                    Material mat = Main.mats[faces[index][i]];
+                    Material mat = Main.materials[faces[index][i]];
                     boxFaces[index][i].setMaterial(mat);
                 }
                 index++;
@@ -43,6 +43,7 @@ public class Cube {
 
     public String getCubeCode(){
         return this.cubeCode;
+
     }
 
     public Box[][] getBoxFaces() {
